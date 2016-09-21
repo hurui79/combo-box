@@ -1,0 +1,41 @@
+.panel-body {
+     background-color: #ffffff;
+     color: #000000;
+     font-size: 12px;
+     border: 1px  solid #95B8E7;
+     overflow: auto;
+     padding: 0;
+} 
+.combo-box{
+     width:100%;
+     height:33px;
+     border:1px solid #95B8E7;
+     border-radius:3px;
+     position:relative;
+     padding:5px;
+}
+.jt
+{
+     background-image:url(../images/combo_arrow.png);
+     background-color:#E0ECFF; 
+     background-position: center center; 
+     background-repeat:no-repeat;  
+     width:18px;
+     height:30px;
+     float:right; 
+     opacity: 0.6;
+     filter: alpha(opacity=60);
+     position:absolute;
+     top:1px;
+     right:-1px; 
+}
+.jt:hover 
+{
+     opacity:0.9;
+     filter: alpha(opacity=90);
+}
+.combo-box,.jt,.combo-box.size-M,.jt.size-M{ font-size:14px; height:31px;line-height:1.42857;}/*默认为M，可以不写，可以理解为：均码*/
+.combo-box.size-MINI,.jt.size-MINI{font-size:12px; height:23px;line-height:1.42857}/*迷你*/
+.combo-box.size-S,.jt.size-S{font-size:12px; height:27px;line-height:1.42857}/*小*/
+.combo-box.size-L,.jt.size-L{font-size:16px; height:41px; }/*大*/
+.combo-box.size-XL,.jt.size-XL{font-size:18px; height:48px;}/*特大*/
