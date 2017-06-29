@@ -37,6 +37,10 @@
     height:0;
     margin-top:-3px;
 }
+.loading {
+    height: 50px;
+    background: url(../images/loading.gif) no-repeat center;
+}
 .selectzq{margin-top: -4px; -webkit-transform:rotate(180deg); transform: rotate(180deg);}
 .jt:hover 
 {
