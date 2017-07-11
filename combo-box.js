@@ -289,6 +289,7 @@ b ? null : [] : h.getNodesByFilter(d, c ? c[d.data.key.children] : h.getNodes(d)
                 else
                     $div.show();
             }
+            var zTreeObj;
             if ($("#" + treeid).children().length == 0) {
                 //首次加载数据绑定
                 if ($div.find(".loading").length == 0)
@@ -302,7 +303,7 @@ b ? null : [] : h.getNodesByFilter(d, c ? c[d.data.key.children] : h.getNodes(d)
                     data: $.extend(options.ajax.data, $obj.data()),
                     success: function (data) {
                         var tree = new zTree(options, $obj, $obj.nextAll("input[type=hidden]"), $div, treeid);
-                        var zTreeObj = $.fn.zTree.init($("#" + treeid), tree.setting, data);
+                        zTreeObj = $.fn.zTree.init($("#" + treeid), tree.setting, data);
                         if (options.allow_input_value)
                             $obj.on("focus", data, tree.focusKey).on("keyup", data, tree.searchNode);
                         else
@@ -368,17 +369,27 @@ b ? null : [] : h.getNodesByFilter(d, c ? c[d.data.key.children] : h.getNodes(d)
 
                 function onClick(event, treeId, treeNode) {
                     input.val(treeNode.name);
-                    hidden.val(treeNode.id);
+                    if (treeNode.id)
+                        hidden.val(treeNode.id);
+                    else
+                        hidden.val(treeNode.name);
                     div.hide();
                     input.change();
                 }
+
                 this.blurKey = function blurKey(event) {
                     if (hidden.val() != "") {//选过的节点的值
-                        var treeObj = $.fn.zTree.getZTreeObj(treeid);
-                        var nodes = treeObj.transformToArray(treeObj.getNodes());
-                        var node = comparevalue(nodes, input.val()); //返回找到的节点
-                        if (node != null) {
-                            if (hidden.val() != node.id) {//对比是否一致
+                        var nodes = zTreeObj.transformToArray(zTreeObj.getNodes());
+                        var node = CompareName(nodes, input.val()); //返回找到的节点
+                        if (node != null && node.length > 0) {
+                            if (node[0].id) {
+                                if (hidden.val() != node[0].id) {//对比是否一致
+                                    input.val("");
+                                    hidden.val("");
+                                    input.change();
+                                }
+                            }
+                            else if (hidden.val() != node[0].name) {
                                 input.val("");
                                 hidden.val("");
                                 input.change();
@@ -395,12 +406,13 @@ b ? null : [] : h.getNodesByFilter(d, c ? c[d.data.key.children] : h.getNodes(d)
                         input.change();
                     }
                 }
+
                 this.focusKey = function focusKey(event) {
                     $.fn.zTree.destroy(treeid);
                     $.fn.zTree.init($("#" + treeid), Tsetting, event.data);
                 };
-                var lastValue = "", nodeList = [], lastTimeStamp = "";
-                var myVar;
+
+                var lastValue = "", nodeList = [];
                 this.searchNode = function searchNode(event) {
                     var keyCode = event.keyCode;
 
@@ -410,54 +422,35 @@ b ? null : [] : h.getNodesByFilter(d, c ? c[d.data.key.children] : h.getNodes(d)
                     ) {
                         return;
                     }
-                    var zTree = $.fn.zTree.getZTreeObj(treeid);
                     var value = $.trim(input.val());
                     if (lastValue === value) return;
                     lastValue = value;
                     if (value === "") {
-                        $.fn.zTree.destroy(treeid);
+                        zTreeObj.destroy();
                         $.fn.zTree.init($("#" + treeid), Tsetting, event.data);
                         return
                     };
-                    if (lastTimeStamp == "")
-                        lastTimeStamp = event.timeStamp;
-                    else {
-                        if ((event.timeStamp - lastTimeStamp) < 1000) {
-                            myVar = setTimeout(function () {
-                                var zTree = $.fn.zTree.getZTreeObj(treeid);
-                                var value = $.trim(input.val());
-                                if (lastValue === value) return;
-                                lastValue = value;
-                                if (value === "") {
-                                    $.fn.zTree.destroy(treeid);
-                                    $.fn.zTree.init($("#" + treeid), Tsetting, event.data);
-                                    return
-                                };
 
-                                nodeList = $.fn.zTree._z.data.getNodesByFilter($.fn.zTree._z.data.getSetting(treeid), event.data, filter);
-                                if (nodeList.length > 0) {
-                                    $.fn.zTree.destroy(treeid);
-                                    $.fn.zTree.init($("#" + treeid), Tsetting, nodeList);
-                                }
-                            }, 1000);
-                            return;
-                        }
-                        clearTimeout(myVar);
-                    }
                     nodeList = $.fn.zTree._z.data.getNodesByFilter($.fn.zTree._z.data.getSetting(treeid), event.data, filter);
                     if (nodeList.length > 0) {
-                        $.fn.zTree.destroy(treeid);
+                        zTreeObj.destroy();
                         $.fn.zTree.init($("#" + treeid), Tsetting, nodeList);
                     }
                 }
+
                 /*ztree遍历全部节点，值是否相同*/
-                function comparevalue(nodelist, value) {
+                function CompareName(nodelist, value) {
+                    var nodes = [];
                     for (var i = 0; i < nodelist.length; i++) {
                         if (value == nodelist[i].name)
-                            return nodelist[i];
+                            nodes.push(nodelist[i])
                     }
-                    return null;
+                    if (nodes.length > 0)
+                        return nodes;
+                    else
+                        return null;
                 }
+
                 function filter(node) {
                     if (node.name.indexOf(lastValue) > -1)
                         return true;
@@ -481,7 +474,8 @@ b ? null : [] : h.getNodesByFilter(d, c ? c[d.data.key.children] : h.getNodes(d)
                         else
                             return false;
                     }
-                };
+                }
+
             }
         }
     }
